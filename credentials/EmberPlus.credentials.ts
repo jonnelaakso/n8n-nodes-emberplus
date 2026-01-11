@@ -1,6 +1,6 @@
 import type { ICredentialType, INodeProperties } from 'n8n-workflow';
 
-export class EmberPlusApi implements ICredentialType {
+export class EmberPlus implements ICredentialType {
 	name = 'emberPlusApi';
 
 	displayName = 'Ember+ API';

@@ -2,11 +2,18 @@
 	"node": "n8n-nodes-emberplus.emberPlus",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
-	"categories": ["Miscellaneous"],
+	"categories": [
+		"Miscellaneous"
+	],
 	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/jonnelaakso/n8n-nodes-emberplus#credential-setup"
+			}
+		],
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/Lawo/ember-plus"
+				"url": "https://github.com/jonnelaakso/n8n-nodes-emberplus"
 			}
 		]
 	}
