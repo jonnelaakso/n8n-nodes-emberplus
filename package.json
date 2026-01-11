@@ -1,7 +1,7 @@
 {
 	"name": "n8n-nodes-emberplus",
 	"version": "0.1.0",
-	"description": "",
+	"description": "n8n community node for interacting with Ember+ devices",
 	"license": "MIT",
 	"homepage": "https://github.com/jonnelaakso/n8n-nodes-emberplus",
 	"keywords": [

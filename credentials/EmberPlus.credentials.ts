@@ -1,11 +1,20 @@
 import type { ICredentialType, INodeProperties } from 'n8n-workflow';
 
-export class EmberPlus implements ICredentialType {
+export class EmberPlusApi implements ICredentialType {
 	name = 'emberPlusApi';
 
 	displayName = 'Ember+ API';
 
+	icon = 'file:emberplus.svg';
+
 	documentationUrl = 'https://github.com/Lawo/ember-plus';
+
+	test = {
+		request: {
+			baseURL: '={{$credentials.host}}:{{$credentials.port}}',
+			url: '',
+		},
+	};
 
 	properties: INodeProperties[] = [
 		{

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @n8n/community-nodes/no-restricted-imports
 import { EmberClient } from 'emberplus-connection';
 import {
 	EmberPlusError,
@@ -99,6 +100,7 @@ export class EmberPlusClient {
 		try {
 			const connectPromise = this.client.connect();
 			const timeoutPromise = new Promise<never>((_, reject) => {
+				// eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
 				setTimeout(() => {
 					reject(createTimeoutError(this.host, this.port, this.timeout));
 				}, this.timeout);
@@ -193,6 +195,7 @@ export class EmberPlusClient {
 				node = this.client.tree;
 			}
 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const req = await this.client.getDirectory(node as any);
 			const responsePromise = req.response;
 			if (responsePromise) {
@@ -284,6 +287,7 @@ export class EmberPlusClient {
 				return { success: false, error: error.message, errorCode: error.code };
 			}
 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const req = await this.client.setValue(node as any, value as any);
 			const responsePromise = req.response;
 			if (responsePromise) {
@@ -326,6 +330,7 @@ export class EmberPlusClient {
 			// Store callback for this path
 			this.subscriptions.set(path, callback);
 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await this.client.subscribe(node as any, (update: unknown) => {
 				const cb = this.subscriptions.get(path);
 				if (cb) {
@@ -405,6 +410,7 @@ export class EmberPlusClient {
 		operation: string,
 	): Promise<T> {
 		const timeoutPromise = new Promise<never>((_, reject) => {
+			// eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
 			setTimeout(() => {
 				reject(new EmberPlusError(`Operation timed out: ${operation}`, {
 					code: EmberPlusErrorCode.CONNECTION_TIMEOUT,

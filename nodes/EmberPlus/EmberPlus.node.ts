@@ -148,7 +148,7 @@ export class EmberPlus implements INodeType {
 		let credentials: ICredentialDataDecryptedObject;
 		try {
 			credentials = await this.getCredentials('emberPlusApi');
-		} catch (error) {
+		} catch {
 			throw new NodeOperationError(
 				this.getNode(),
 				'Failed to get Ember+ credentials. Please check your credential configuration.',

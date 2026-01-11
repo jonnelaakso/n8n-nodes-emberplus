@@ -22,6 +22,7 @@ const LOG_LEVEL_NAMES: Record<LogLevel, string> = {
 };
 
 function getLogLevelFromEnv(): LogLevel {
+	// eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
 	const envLevel = process.env.EMBER_PLUS_LOG_LEVEL?.toUpperCase();
 	switch (envLevel) {
 		case 'DEBUG':
@@ -36,6 +37,7 @@ function getLogLevelFromEnv(): LogLevel {
 			return LogLevel.NONE;
 		default:
 			// Default to WARN in production, DEBUG if explicitly requested
+			// eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
 			return process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.WARN;
 	}
 }

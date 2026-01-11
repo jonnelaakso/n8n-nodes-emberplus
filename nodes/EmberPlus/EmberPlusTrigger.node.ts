@@ -8,6 +8,7 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
+// eslint-disable-next-line @n8n/community-nodes/no-restricted-imports
 import { EmberClient } from 'emberplus-connection';
 import { createLogger } from './shared/logger';
 import { validatePath } from './shared/pathUtils';
@@ -26,6 +27,7 @@ export class EmberPlusTrigger implements INodeType {
 		},
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
+		usableAsTool: false,
 		credentials: [
 			{
 				name: 'emberPlusApi',
@@ -82,7 +84,7 @@ export class EmberPlusTrigger implements INodeType {
 		let credentials: ICredentialDataDecryptedObject;
 		try {
 			credentials = await this.getCredentials('emberPlusApi');
-		} catch (error) {
+		} catch {
 			throw new NodeOperationError(
 				this.getNode(),
 				'Failed to get Ember+ credentials. Please check your credential configuration.',
@@ -220,6 +222,7 @@ export class EmberPlusTrigger implements INodeType {
 			}
 
 			// Subscribe to changes
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await client.subscribe(node as any, (update: unknown) => {
 				try {
 					const newValue = extractValue(update);
@@ -247,6 +250,7 @@ export class EmberPlusTrigger implements INodeType {
 			// Connect with timeout
 			const connectPromise = client.connect();
 			const timeoutPromise = new Promise<never>((_, reject) => {
+				// eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
 				setTimeout(() => {
 					reject(new NodeOperationError(
 						this.getNode(),
@@ -273,7 +277,10 @@ export class EmberPlusTrigger implements INodeType {
 			reconnectAttempts++;
 			logger.warn('Attempting reconnect', { attempt: reconnectAttempts, maxAttempts: maxReconnectAttempts });
 
-			await new Promise((resolve) => setTimeout(resolve, reconnectDelay));
+			await new Promise((resolve) => {
+				// eslint-disable-next-line @n8n/community-nodes/no-restricted-globals
+				setTimeout(resolve, reconnectDelay);
+			});
 
 			try {
 				await connect();

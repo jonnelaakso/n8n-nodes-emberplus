@@ -94,7 +94,7 @@ export function validatePath(path: string): PathValidationResult {
 	}
 
 	// Check for invalid characters
-	if (/[\/\\:*?"<>|]/.test(trimmed)) {
+	if (/[/\\:*?"<>|]/.test(trimmed)) {
 		return { valid: false, error: 'Path contains invalid characters' };
 	}
 
@@ -120,7 +120,7 @@ export function validatePath(path: string): PathValidationResult {
 		// but each segment should be valid on its own
 		if (!isNumericSegment(segment) && !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(segment)) {
 			// Allow more flexible identifier names (spaces, special chars used in some devices)
-			if (!/^[^\.\n\r]+$/.test(segment)) {
+			if (!/^[^.\n\r]+$/.test(segment)) {
 				return { valid: false, error: `Invalid path segment: "${segment}"` };
 			}
 		}
