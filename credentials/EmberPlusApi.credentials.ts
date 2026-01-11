@@ -5,6 +5,9 @@ export class EmberPlusApi implements ICredentialType {
 
 	displayName = 'Ember+ API';
 
+	// @ts-expect-error - icon is required by linter but not in ICredentialType interface
+	icon = 'file:emberplus.svg';
+
 	documentationUrl = 'https://github.com/Lawo/ember-plus';
 
 	test = {
