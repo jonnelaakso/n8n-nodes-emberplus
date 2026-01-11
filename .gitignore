@@ -2,3 +2,4 @@ dist
 node_modules
 CLAUDE.md
 CODE_OF_CONDUCT.md
+.npmrc
