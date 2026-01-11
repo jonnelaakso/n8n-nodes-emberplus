@@ -5,8 +5,6 @@ export class EmberPlusApi implements ICredentialType {
 
 	displayName = 'Ember+ API';
 
-	icon = 'file:emberplus.svg';
-
 	documentationUrl = 'https://github.com/Lawo/ember-plus';
 
 	test = {

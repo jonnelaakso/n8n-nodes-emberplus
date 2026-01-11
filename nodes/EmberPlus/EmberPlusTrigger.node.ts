@@ -27,7 +27,6 @@ export class EmberPlusTrigger implements INodeType {
 		},
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
-		usableAsTool: false,
 		credentials: [
 			{
 				name: 'emberPlusApi',
