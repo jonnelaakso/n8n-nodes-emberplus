@@ -4,6 +4,8 @@ import type {
 	INodeType,
 	INodeTypeDescription,
 	ICredentialDataDecryptedObject,
+	IDataObject,
+	GenericValue,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { EmberPlusClient } from './shared/EmberPlusClient';
@@ -201,6 +203,9 @@ export class EmberPlus implements INodeType {
 			}
 
 			// Process each item
+			// Store reference to class instance for method calls
+			const nodeInstance = this as unknown as EmberPlus;
+			
 			for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
 				try {
 					const operation = this.getNodeParameter('operation', itemIndex) as string;
@@ -212,22 +217,22 @@ export class EmberPlus implements INodeType {
 
 					switch (operation) {
 						case 'browse': {
-							result = await this.executeBrowse(client, path, itemIndex, logger);
+							result = await nodeInstance.executeBrowse(this, client, path, itemIndex, logger);
 							break;
 						}
 
 						case 'get': {
-							result = await this.executeGet(client, path, itemIndex, logger);
+							result = await nodeInstance.executeGet(this, client, path, itemIndex, logger);
 							break;
 						}
 
 						case 'set': {
-							result = await this.executeSet(client, path, itemIndex, logger);
+							result = await nodeInstance.executeSet(this, client, path, itemIndex, logger);
 							break;
 						}
 
 						case 'subscribe': {
-							result = await this.executeSubscribe(client, path, itemIndex, logger);
+							result = await nodeInstance.executeSubscribe(this, client, path, itemIndex, logger);
 							break;
 						}
 
@@ -283,7 +288,7 @@ export class EmberPlus implements INodeType {
 	}
 
 	private async executeBrowse(
-		this: IExecuteFunctions,
+		executeFunctions: IExecuteFunctions,
 		client: EmberPlusClient,
 		path: string,
 		itemIndex: number,
@@ -292,7 +297,7 @@ export class EmberPlus implements INodeType {
 		const browseResult = await client.browse(path || undefined);
 
 		if (!browseResult.success) {
-			throw this.createPathError(path || '/', browseResult.error!, browseResult.errorCode, itemIndex);
+			throw this.createPathError(executeFunctions, path || '/', browseResult.error!, browseResult.errorCode, itemIndex);
 		}
 
 		logger.debug('Browse completed', { path: path || '/', nodeCount: browseResult.data?.length });
@@ -308,7 +313,7 @@ export class EmberPlus implements INodeType {
 	}
 
 	private async executeGet(
-		this: IExecuteFunctions,
+		executeFunctions: IExecuteFunctions,
 		client: EmberPlusClient,
 		path: string,
 		itemIndex: number,
@@ -316,7 +321,7 @@ export class EmberPlus implements INodeType {
 	): Promise<INodeExecutionData> {
 		if (!path) {
 			throw new NodeOperationError(
-				this.getNode(),
+				executeFunctions.getNode(),
 				'Path is required for get operation',
 				{
 					itemIndex,
@@ -329,7 +334,7 @@ export class EmberPlus implements INodeType {
 		const pathValidation = validatePath(path);
 		if (!pathValidation.valid) {
 			throw new NodeOperationError(
-				this.getNode(),
+				executeFunctions.getNode(),
 				`Invalid path format: ${path}`,
 				{
 					itemIndex,
@@ -341,7 +346,7 @@ export class EmberPlus implements INodeType {
 		const getResult = await client.get(path);
 
 		if (!getResult.success) {
-			throw this.createPathError(path, getResult.error!, getResult.errorCode, itemIndex);
+			throw this.createPathError(executeFunctions, path, getResult.error!, getResult.errorCode, itemIndex);
 		}
 
 		logger.debug('Get completed', { path, valueType: typeof getResult.data });
@@ -350,14 +355,14 @@ export class EmberPlus implements INodeType {
 			json: {
 				operation: 'get',
 				path,
-				value: getResult.data,
+				value: getResult.data as IDataObject | GenericValue | GenericValue[] | IDataObject[],
 			},
 			pairedItem: itemIndex,
 		};
 	}
 
 	private async executeSet(
-		this: IExecuteFunctions,
+		executeFunctions: IExecuteFunctions,
 		client: EmberPlusClient,
 		path: string,
 		itemIndex: number,
@@ -365,7 +370,7 @@ export class EmberPlus implements INodeType {
 	): Promise<INodeExecutionData> {
 		if (!path) {
 			throw new NodeOperationError(
-				this.getNode(),
+				executeFunctions.getNode(),
 				'Path is required for set operation',
 				{
 					itemIndex,
@@ -378,7 +383,7 @@ export class EmberPlus implements INodeType {
 		const pathValidation = validatePath(path);
 		if (!pathValidation.valid) {
 			throw new NodeOperationError(
-				this.getNode(),
+				executeFunctions.getNode(),
 				`Invalid path format: ${path}`,
 				{
 					itemIndex,
@@ -387,8 +392,8 @@ export class EmberPlus implements INodeType {
 			);
 		}
 
-		const rawValue = this.getNodeParameter('value', itemIndex) as string;
-		const valueType = this.getNodeParameter('valueType', itemIndex) as string;
+		const rawValue = executeFunctions.getNodeParameter('value', itemIndex) as string;
+		const valueType = executeFunctions.getNodeParameter('valueType', itemIndex) as string;
 
 		// Convert value to correct type
 		let typedValue: unknown = rawValue;
@@ -397,7 +402,7 @@ export class EmberPlus implements INodeType {
 				typedValue = Number(rawValue);
 				if (isNaN(typedValue as number)) {
 					throw new NodeOperationError(
-						this.getNode(),
+						executeFunctions.getNode(),
 						`Invalid number value: "${rawValue}"`,
 						{
 							itemIndex,
@@ -411,7 +416,7 @@ export class EmberPlus implements INodeType {
 				const lowerValue = rawValue.toLowerCase().trim();
 				if (!['true', 'false', '1', '0', 'yes', 'no'].includes(lowerValue)) {
 					throw new NodeOperationError(
-						this.getNode(),
+						executeFunctions.getNode(),
 						`Invalid boolean value: "${rawValue}"`,
 						{
 							itemIndex,
@@ -427,7 +432,7 @@ export class EmberPlus implements INodeType {
 		const setResult = await client.set(path, typedValue);
 
 		if (!setResult.success) {
-			throw this.createPathError(path, setResult.error!, setResult.errorCode, itemIndex);
+			throw this.createPathError(executeFunctions, path, setResult.error!, setResult.errorCode, itemIndex);
 		}
 
 		logger.debug('Set completed', { path, value: typedValue });
@@ -436,7 +441,7 @@ export class EmberPlus implements INodeType {
 			json: {
 				operation: 'set',
 				path,
-				value: typedValue,
+				value: typedValue as IDataObject | GenericValue | GenericValue[] | IDataObject[],
 				success: true,
 			},
 			pairedItem: itemIndex,
@@ -444,7 +449,7 @@ export class EmberPlus implements INodeType {
 	}
 
 	private async executeSubscribe(
-		this: IExecuteFunctions,
+		executeFunctions: IExecuteFunctions,
 		client: EmberPlusClient,
 		path: string,
 		itemIndex: number,
@@ -452,7 +457,7 @@ export class EmberPlus implements INodeType {
 	): Promise<INodeExecutionData> {
 		if (!path) {
 			throw new NodeOperationError(
-				this.getNode(),
+				executeFunctions.getNode(),
 				'Path is required for subscribe operation',
 				{
 					itemIndex,
@@ -465,7 +470,7 @@ export class EmberPlus implements INodeType {
 		const pathValidation = validatePath(path);
 		if (!pathValidation.valid) {
 			throw new NodeOperationError(
-				this.getNode(),
+				executeFunctions.getNode(),
 				`Invalid path format: ${path}`,
 				{
 					itemIndex,
@@ -478,7 +483,7 @@ export class EmberPlus implements INodeType {
 		const getForSubscribe = await client.get(path);
 
 		if (!getForSubscribe.success) {
-			throw this.createPathError(path, getForSubscribe.error!, getForSubscribe.errorCode, itemIndex);
+			throw this.createPathError(executeFunctions, path, getForSubscribe.error!, getForSubscribe.errorCode, itemIndex);
 		}
 
 		logger.debug('Subscribe (get current) completed', { path });
@@ -487,7 +492,7 @@ export class EmberPlus implements INodeType {
 			json: {
 				operation: 'subscribe',
 				path,
-				currentValue: getForSubscribe.data,
+				currentValue: getForSubscribe.data as IDataObject | GenericValue | GenericValue[] | IDataObject[],
 				subscribed: true,
 			},
 			pairedItem: itemIndex,
@@ -495,7 +500,7 @@ export class EmberPlus implements INodeType {
 	}
 
 	private createPathError(
-		this: IExecuteFunctions,
+		executeFunctions: IExecuteFunctions,
 		path: string,
 		errorMessage: string,
 		errorCode: EmberPlusErrorCode | undefined,
@@ -520,7 +525,7 @@ export class EmberPlus implements INodeType {
 				description = 'An error occurred while accessing the Ember+ device.';
 		}
 
-		return new NodeOperationError(this.getNode(), errorMessage, {
+		return new NodeOperationError(executeFunctions.getNode(), errorMessage, {
 			itemIndex,
 			description,
 		});

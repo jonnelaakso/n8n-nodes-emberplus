@@ -193,14 +193,17 @@ export class EmberPlusClient {
 				node = this.client.tree;
 			}
 
-			const req = await this.client.getDirectory(node);
-			await this.withTimeout(req.response, DEFAULT_OPERATION_TIMEOUT, 'getDirectory response');
+			const req = await this.client.getDirectory(node as any);
+			const responsePromise = req.response;
+			if (responsePromise) {
+				await this.withTimeout(responsePromise, DEFAULT_OPERATION_TIMEOUT, 'getDirectory response');
+			}
 
 			const children = this.extractNodeInfo(node);
 			this.logger.operationSuccess('browse', { path: operationPath, nodeCount: children.length });
 			return { success: true, data: children };
 		} catch (error) {
-			return this.handleOperationError('browse', pathOrNode || '/', error);
+			return this.handleOperationError('browse', pathOrNode || '/', error) as EmberPlusResult<EmberNodeInfo[]>;
 		}
 	}
 
@@ -281,8 +284,11 @@ export class EmberPlusClient {
 				return { success: false, error: error.message, errorCode: error.code };
 			}
 
-			const req = await this.client.setValue(node, value);
-			await this.withTimeout(req.response, DEFAULT_OPERATION_TIMEOUT, 'setValue response');
+			const req = await this.client.setValue(node as any, value as any);
+			const responsePromise = req.response;
+			if (responsePromise) {
+				await this.withTimeout(responsePromise, DEFAULT_OPERATION_TIMEOUT, 'setValue response');
+			}
 
 			this.logger.operationSuccess('set', { path, value });
 			return { success: true };
@@ -320,7 +326,7 @@ export class EmberPlusClient {
 			// Store callback for this path
 			this.subscriptions.set(path, callback);
 
-			await this.client.subscribe(node, (update: unknown) => {
+			await this.client.subscribe(node as any, (update: unknown) => {
 				const cb = this.subscriptions.get(path);
 				if (cb) {
 					try {

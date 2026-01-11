@@ -5,10 +5,11 @@ import type {
 	ITriggerResponse,
 	INodeExecutionData,
 	ICredentialDataDecryptedObject,
+	IDataObject,
 } from 'n8n-workflow';
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import { EmberClient } from 'emberplus-connection';
-import { createLogger, EmberPlusLogger } from './shared/logger';
+import { createLogger } from './shared/logger';
 import { validatePath } from './shared/pathUtils';
 
 export class EmberPlusTrigger implements INodeType {
@@ -169,7 +170,7 @@ export class EmberPlusTrigger implements INodeType {
 				}
 
 				const executionData: INodeExecutionData = {
-					json: outputData,
+					json: outputData as IDataObject,
 				};
 
 				logger.debug('Emitting value', { path, valueType: typeof value });
@@ -219,7 +220,7 @@ export class EmberPlusTrigger implements INodeType {
 			}
 
 			// Subscribe to changes
-			await client.subscribe(node, (update: unknown) => {
+			await client.subscribe(node as any, (update: unknown) => {
 				try {
 					const newValue = extractValue(update);
 
