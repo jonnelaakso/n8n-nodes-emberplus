@@ -31,7 +31,7 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/EmberPlus.credentials.js"
+			"dist/credentials/EmberPlusApi.credentials.js"
 		],
 		"nodes": [
 			"dist/nodes/EmberPlus/EmberPlus.node.js",
